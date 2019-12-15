@@ -1,2 +1,3 @@
 ﻿  main.cpp
+C:\Users\Tommy\source\repos\AVLTree\AVLTree\main.cpp(429): warning C4715: 'getParentSuccessor': not all control paths return a value
   AVLTree.vcxproj -> C:\Users\Tommy\source\repos\AVLTree\Debug\AVLTree.exe

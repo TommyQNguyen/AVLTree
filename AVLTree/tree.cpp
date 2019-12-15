@@ -75,7 +75,7 @@ void printLeftLink(int& x, int& y, int stopAt)
 }
 
 void printNode(Node* node, int x, int y, int maxDepth, int nodeDepth) {
-	cout << node->value;;
+	cout << node->value << "<" << node->height;
 	int nextRowToPrint = getDisplayedRowByDepth(maxDepth, nodeDepth + 1);
 	if (node->left != NULL) {
 		int leftX = x, leftY = y;

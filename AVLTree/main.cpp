@@ -12,6 +12,8 @@ void remove(Node& n, int value);
 Node* findValue(Node* n, int valueToFind);
 Node* findSmallest(Node* n);
 Node* findParent(Node* root, int valueToFind);
+Node* getSuccessor(Node* node);
+void updateHeight(Node* node);
 void showTree();
 int height(Node* n);
 void init();
@@ -20,7 +22,20 @@ void menu_ADD();
 void rotation(Node* n);
 void leftRotation(Node* n);
 void rightRotation(Node* n);
+void leftRightRotation(Node* n);
+void rightLeftRotation(Node* n);
+void deletion(int value);
+void deletion(Node* node, int value);
+bool isLeafNode(Node* node);
+bool hasOneChild(Node* node);
+void deleteSuccessor(Node* n, int value);
+Node* find(int value);
+Node* findRecursive(Node* root, int value);
+Node* getParentSuccessor(Node* root, Node* successor);
 void swap(Node* a, Node* b);
+void postorder(Node* node);
+void preorder(Node* node);
+void inorder(Node* node);
 
 
 Node* root = NULL;
@@ -43,9 +58,21 @@ int main() {
 		case MENU_PRINT:
 			showTree();
 			break;
-		case MENU_DELETE:
-			//Delete
+		case MENU_DELETE: {
+			int dataInput = 0;
+
+			clrscr();
+			cvmSetColor(ROSE);
+			cout << "\n\n\n\n\n\n\nQuelle est la valeur ? : ";
+			cvmResetColor();
+			cin >> dataInput;
+
+			deletion(dataInput);
+			clrscr();
+			showTree();
+			clrscr();
 			break;
+		}
 		case MENU_TRAVERSAL:
 			//Traversal function
 			break;
@@ -55,9 +82,15 @@ int main() {
 
 void init()
 {
-	/*insert(1);
-	insert(2);
-	insert(3);*/
+	insert(5);
+	insert(1);
+	insert(7);
+	insert(6);
+	insert(-1);
+	insert(4);
+	insert(9);
+	insert(8);
+	insert(10);
 }
 
 void insert(Node* n, int value) {
@@ -195,11 +228,22 @@ void menu_ADD()
 }
 
 void rotation(Node* n) {
-	if (n->left == nullptr) {
-		leftRotation(n);
+	if (n->left != nullptr) {
+
+		if (n->left->right != nullptr) {
+			leftRightRotation(n);
+		}
+		else {
+			rightRotation(n);
+		}
 	}
-	else if (n->right == nullptr) {
-		rightRotation(n);
+	else {
+		if (n->right->right != nullptr) {
+			leftRotation(n);
+		}
+		else {
+			rightLeftRotation(n);
+		}
 	}
 }
 
@@ -227,8 +271,229 @@ void rightRotation(Node* n) {
 	n->left->height--;
 }
 
+void leftRightRotation(Node* n) {
+	Node* temp = n->left->right;
+	n->left->left = new Node;
+	n->left->left->value = temp->value;
+	n->left->right = nullptr;
+	delete temp;
+	n->left->height += 2;
+	swap(n->left, n->left->left);
+	rightRotation(n);
+}
+
+void rightLeftRotation(Node* n) {
+	Node* temp = n->right->left;
+	n->right->right = new Node;
+	n->right->right->value = temp->value;
+	n->right->left = nullptr;
+	delete temp;
+	n->right->height -= 2;
+	swap(n->right, n->right->right);
+	leftRotation(n);
+}
+
+void deletion(int value) {
+	deletion(root, value);
+}
+
+void deletion(Node* node, int value) {
+	if (node->value == value) {
+		// deleteRootNode();
+		return;
+	}
+
+	if (value < node->value) {
+		if (node->left->value == value) {
+			if (isLeafNode(node->left)) {
+				node->left = nullptr;
+			}
+			else if(hasOneChild(node->left)) {
+				if (node->left->right == nullptr) {
+					swap(node->left, node->left->left);
+					Node* temp = node->left->left;
+					node->left->left = nullptr;
+					delete temp;
+					node->left->height--;
+				}
+				else {
+					swap(node->left, node->left->right);
+					Node* temp = node->left->right;
+					node->left->right = nullptr;
+					node->left->height++;
+				}
+			}
+			else {
+				Node* successor = getSuccessor(node->left->right);
+				swap(node->left, successor);
+				deleteSuccessor(root, value);
+				if (successor->right != nullptr) {
+					swap(successor, successor->right);
+				}
+				if (node->left->right == successor && isLeafNode(successor)) {
+					node->left->right = nullptr;
+				}
+				updateHeight(node);
+			}
+		}
+		else {
+			deletion(node->left, value);
+		}
+	}
+	else {
+		if (node->right->value == value) {
+			if (isLeafNode(node->right)) {
+				node->right = nullptr;
+			}
+			else if (hasOneChild(node->right)) {
+				if (node->right->right == nullptr) {
+					swap(node->right, node->right->left);
+					Node* temp = node->right->left;
+					node->right->left = nullptr;
+					delete temp;
+					node->right->height--;
+				}
+				else {
+					swap(node->right, node->right->right);
+					Node* temp = node->right->right;
+					node->right->right = nullptr;
+					delete temp;
+					node->right->height++;
+				}
+			}
+			else {
+				Node* successor = getSuccessor(node->right->right);
+				swap(node->right, successor);
+				deleteSuccessor(root, value);
+				if (successor->right != nullptr) {
+					swap(successor, successor->right);
+				}
+				if (node->right->right == successor && isLeafNode(successor)) {
+					node->right->right = nullptr;
+				}
+				updateHeight(node);
+			}
+		}
+		else {
+			deletion(node->right, value);
+		}
+	}
+	updateHeight(node);
+	if (node->height == 2 || node->height == -2)
+		rotation(node);
+}
+
+Node* find(int value) {
+	return findRecursive(root, value);
+}
+
+Node* findRecursive(Node* node, int value) {
+	if (node->value == value) {
+		return node;
+	}
+
+	if (value < node->value) {
+		if (node->left == nullptr) {
+			return nullptr;
+		}
+		else {
+			return findRecursive(node->left, value);
+		}
+	}
+	else {
+		if (node->right == nullptr) {
+			return nullptr;
+		}
+		else {
+			return findRecursive(node->right, value);
+		}
+	}
+
+	return nullptr;
+}
+
+Node* getSuccessor(Node* node) {
+	if (node->left == nullptr)
+		return node;
+	return getSuccessor(node->left);
+}
+
+Node* getParentSuccessor(Node* root, Node* successor) {
+	if (root->left == successor)
+		return root;
+	if (root->right == successor)
+		return root;
+
+	getParentSuccessor(root->left, successor);
+	getParentSuccessor(root->right, successor);
+}
+
+void updateHeight(Node* node) {
+	if (node == nullptr)
+		return;
+	node->height = height(node->left) - height(node->right);
+	updateHeight(node->left);
+	updateHeight(node->right);
+
+}
+
+void deleteSuccessor(Node* n, int value) {
+	if (n == NULL)
+		return;
+	if(n->left != nullptr)
+		if (n->left->value == value) {
+			n->left = nullptr;
+			return;
+		}
+
+	if(n->right != nullptr)
+		if (n->right->value == value) {
+			n->right = nullptr;
+			return;
+		}
+
+	deleteSuccessor(n->left, value);
+	deleteSuccessor(n->right, value);
+}
+
 void swap(Node* a, Node* b) {
 	int temp = a->value;
 	a->value = b->value;
 	b->value = temp;
+}
+
+bool hasOneChild(Node* node) {
+	return (node->left == nullptr && node->right != nullptr) || (node->left != nullptr && node->right == nullptr);
+}
+
+bool isLeafNode(Node* node){
+	return node->left == nullptr && node->right == nullptr;
+}
+
+void inorder(Node* root) {
+	if (root != NULL) {
+		inorder(root->left);
+		cout << root->value << " ";
+		inorder(root->right);
+	}
+}
+
+void postorder( Node* node)
+{
+	if (node == nullptr)
+		return;
+
+	postorder(node->left);
+	postorder(node->right);
+	cout << node->value << " ";
+}
+
+void preorder(Node* node)
+{
+	if (node == NULL)
+		return;
+
+	cout << node->value << " ";
+	preorder(node->left);
+	preorder(node->right);
 }
