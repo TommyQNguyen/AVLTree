@@ -19,9 +19,12 @@ int showMenu();
 void menu_ADD();
 void rotation(Node* n);
 void leftRotation(Node* n);
+void left(Node* n);
+void leftLeft(Node* n);
 void rightRotation(Node* n);
+void rightRight(Node* n);
 void swap(Node* a, Node* b);
-
+void swapNode(Node* a, Node* b);
 
 Node* root = NULL;
 
@@ -195,12 +198,38 @@ void menu_ADD()
 }
 
 void rotation(Node* n) {
-	if (n->left == nullptr) {
-		leftRotation(n);
+	if (n->left != nullptr) {
+		if (n->height == 2 && n->left->height == -1) {
+			leftLeft(n);
+			rightRotation(n);
+		}
 	}
-	else if (n->right == nullptr) {
-		rightRotation(n);
+
+	if (n->right != nullptr) {
+		if (n->height == -2 && n->right->height == -1) {
+			leftRotation(n);
+		}
 	}
+
+	if (n->right != nullptr) {
+		if (n->height == -2 && n->right->height == 1) {
+			rightRight(n);
+			left(n);
+		}
+	}
+
+	//if (n->left == nullptr) {
+//		if (n->right->right == nullptr) {
+	//		rightRight(n);
+	//	}
+	//	leftRotation(n);
+	//}
+//	else if (n->right == nullptr) {
+	//	if (n->left->left == nullptr) {
+	//		leftLeft(n);
+	//	}
+	//	rightRotation(n);
+	//}
 }
 
 void leftRotation(Node* n) {
@@ -215,6 +244,23 @@ void leftRotation(Node* n) {
 	n->right->height++;
 }
 
+void left(Node* n) {
+	Node* temp = n;
+	n = n->right;
+	n->left = temp;
+	n->left->right = nullptr;
+}
+
+void leftLeft(Node* n) {
+	swap(n->left, n->left->right);
+
+	Node* temp = n->left->right;
+	n->left->left = new Node;
+	n->left->left->value = temp->value;
+	delete n->left->right;
+	n->left->right = nullptr;
+}
+
 void rightRotation(Node* n) {
 	swap(n, n->left);
 	Node* temp = n->left->left;
@@ -227,8 +273,29 @@ void rightRotation(Node* n) {
 	n->left->height--;
 }
 
+void rightRight(Node* n) {
+	swap(n->right, n->right->left);
+	Node* temp = n->right->left;
+	Node* tempLeft = n->right->left->right != nullptr ? n->right->left->right : nullptr;
+	Node* tempRight = n->right->right != nullptr ? n->right->right : nullptr;
+	n->right->right = new Node;
+	n->right->right->value = temp->value;
+	delete n->right->left;
+	n->right->left = nullptr;
+	n->right->right->right = tempRight;
+	n->right->right->left = tempLeft;
+	
+}
+
+
 void swap(Node* a, Node* b) {
 	int temp = a->value;
 	a->value = b->value;
 	b->value = temp;
+}
+
+void swapNode(Node* a, Node* b) {
+	Node* temp = a;
+	a = b;
+	b = temp;
 }
