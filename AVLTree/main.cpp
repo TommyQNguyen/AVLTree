@@ -1,4 +1,5 @@
 #include <iostream>
+#include <conio.h>
 #include "console(v1.9).h"
 #include "tree.h"
 
@@ -19,6 +20,8 @@ int height(Node* n);
 void init();
 int showMenu();
 void menu_ADD();
+void menu_DELETE();
+void menu_TRAVERSAL();
 void rotation(Node* n);
 void leftRotation(Node* n);
 void rightRotation(Node* n);
@@ -48,7 +51,7 @@ int main() {
 	int choice = 0;
 	while (choice != MENU_QUIT)
 	{
-		//showStack(first);
+		cvmSetColor(CYAN);
 		choice = showMenu();
 		switch (choice) 
 		{
@@ -59,24 +62,16 @@ int main() {
 			showTree();
 			break;
 		case MENU_DELETE: {
-			int dataInput = 0;
-
-			clrscr();
-			cvmSetColor(ROSE);
-			cout << "\n\n\n\n\n\n\nQuelle est la valeur ? : ";
-			cvmResetColor();
-			cin >> dataInput;
-
-			deletion(dataInput);
-			clrscr();
-			showTree();
-			clrscr();
+			menu_DELETE();
 			break;
 		}
 		case MENU_TRAVERSAL:
 			//Traversal function
+			menu_TRAVERSAL();
+
 			break;
 		}
+		cvmResetColor();
 	}
 }
 
@@ -225,6 +220,39 @@ void menu_ADD()
 	clrscr();
 	showTree();
 	clrscr();
+}
+
+void menu_DELETE()
+{
+	int dataInput = 0;
+
+	clrscr();
+	cvmSetColor(JAUNE);
+	cout << "\n\n\n\n\n\n\nQuelle est la valeur ? : ";
+	cvmResetColor();
+	cin >> dataInput;
+
+	deletion(dataInput);
+	clrscr();
+	showTree();
+	clrscr();
+}
+
+void menu_TRAVERSAL()
+{
+	clrscr();
+	cvmSetColor(BLEU);
+	cout << "Voici le parcours prefix :\n\n";
+	preorder(root);
+
+	cout << "\n\nVoici le parcours infixe :\n\n";
+	inorder(root);
+
+	cout << "\n\nVoici le parcours postfixe :\n\n";
+	postorder(root);
+	_getch();
+	clrscr();
+	cvmResetColor();
 }
 
 void rotation(Node* n) {
@@ -473,27 +501,27 @@ bool isLeafNode(Node* node){
 void inorder(Node* root) {
 	if (root != NULL) {
 		inorder(root->left);
-		cout << root->value << " ";
+		cout << root->value << "->";
 		inorder(root->right);
 	}
 }
 
-void postorder( Node* node)
+void postorder( Node* root)
 {
-	if (node == nullptr)
+	if (root == nullptr)
 		return;
 
-	postorder(node->left);
-	postorder(node->right);
-	cout << node->value << " ";
+	postorder(root->left);
+	postorder(root->right);
+	cout << root->value << "->";
 }
 
-void preorder(Node* node)
+void preorder(Node* root)
 {
-	if (node == NULL)
+	if (root == NULL)
 		return;
 
-	cout << node->value << " ";
-	preorder(node->left);
-	preorder(node->right);
+	cout << root->value << "->";
+	preorder(root->left);
+	preorder(root->right);
 }
